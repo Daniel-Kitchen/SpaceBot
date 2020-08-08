@@ -1,5 +1,4 @@
-
-import discord, os
+import discord, os, random
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,15 +20,18 @@ async def on_message(message):
     elif message.content.lower() == "~random":
         await message.channel.send(file=randomImg(message))
 
+
 def msgHelp(message):
     helpText = "This bot is a work in progress, please be gentle\n" \
                "~help to see this message again\n"
     return helpText
 
+
 def randomImg(message):
-    with open('SourceImages/The Pillars of Creation.jpg', 'rb') as f:
-        picture = discord.File(f)
-        return picture
+    image = random.choice(os.listdir("SourceImages"))
+    print(image)
+    picture = discord.File("SourceImages/" + image)
+    return picture
 
 
 client.run(TOKEN)
