@@ -5,7 +5,6 @@ from datetime import datetime
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-#SERVER = os.getenv('SERVER_TOKEN')
 
 allImgs = os.listdir("SourceImages")
 imgStore = allImgs.copy()
@@ -17,7 +16,6 @@ client = discord.Client()
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
-    print(client.guilds)
 
 @client.event
 async def on_message(message):
@@ -37,18 +35,33 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user):
     for obj in rollQueue:
-        if obj[0].content == reaction.message.content and user.name != "Spaaaaaaaaaaaaaace":
-            await addToSpaceBase(obj, reaction, user)
+        if obj[0].content == reaction.message.content and user.name != "Spaaaaaaaaaaaaaace" and not \
+                datetime.now().second - obj[2].second > 60:
+            await addToSpaceBase(obj, user, reaction)
+        elif datetime.now().second - obj[2].second > 60 and user.name != "Spaaaaaaaaaaaaaace":
+            img = obj[4]
+            imgStore.append(img)
+            rollQueue.remove(obj)
 
 
-async def addToSpaceBase(obj, reaction, user):
-    ogName = obj[1]
+async def addToSpaceBase(obj, user, reaction):
+    ogName = obj[1].name
     if ogName == user.name:
         if ogName in userDict.keys():
             userDict[ogName].append(obj[3])
         else:
             userDict[ogName] = [obj[3]]
         rollQueue.remove(obj)
+    elif datetime.now().second - obj[2].second > 10:
+        if ogName in userDict.keys():
+            userDict[ogName].append(obj[3])
+        else:
+            userDict[ogName] = [obj[3]]
+        rollQueue.remove(obj)
+    else:
+        await reaction.message.channel.send("{}, please give {} 10 seconds to claim the image!".format(user.mention,
+                                                                                                       obj[1].mention))
+        await reaction.remove(user)
 
 
 def msgHelp():
@@ -56,6 +69,8 @@ def msgHelp():
                "~help to see this message again\n" \
                "~random to see a random image of space\n" \
                "~roll to generate a random image. React to the image to claim it\n" \
+               "* Note: You have 10 seconds to claim this image for yourself before it opens to the whole server!\n" \
+               "* Note: The opportunity for any user to claim an image expires after 60 seconds\n" \
                "~SpaceBase to see all of the images in your space base sent to your dms!"
     return helpText
 
@@ -85,7 +100,7 @@ async def roll(message):
         result = result.id
         result = await message.channel.fetch_message(result)
         await result.add_reaction("👾")
-        rollQueue.append([result, message.author.name, datetime.now(), image])
+        rollQueue.append([result, message.author, datetime.now(), image, imgName])
 
 
 async def sendImgs(message):
