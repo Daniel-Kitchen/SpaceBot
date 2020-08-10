@@ -43,13 +43,33 @@ async def on_message(message):
         await sendImgs(message)
     elif message.content.lower() == "sb!basetxt":
         await sendTxt(message)
-    elif message.content.lower()[:4] == "sb!rem":
+    elif message.content.lower()[:6] == "sb!rem":
         await rem(message)
     elif message.content.lower() == "sb!credits":
         await message.author.send(botCredits())
     elif message.content.lower() == "good bot":
         await message.channel.send("Good {}".format(message.author.mention))
+    elif message.content.lower()[:9] == "sb!showme":
+        await showme(message)
+    elif message.content.lower() == "bad bot":
+        await message.channel.send("Bad {}".format(message.author.mention))
+        print(message.content.lower()[:11])
+    elif message.content.lower()[:11] == "sb!peekbase":
+        await peekBase(message)
 
+
+async def showme(message):
+    """
+    Shows the user the specific image they are requesting, if available
+    :param message: The image they are requesting
+    """
+    img = message.content[10:] + ".jpg"
+    if img in allImgs:
+        img = "SourceImages/" + img
+        await message.channel.send(content="Here is {}, {}!".format(message.content[10:], message.author.mention),
+                                   file=discord.File(img))
+    else:
+        await message.channel.send("Sorry, I don't know that image! Please make sure your request has proper casing!")
 
 def botCredits():
     """
@@ -77,9 +97,31 @@ async def sendTxt(message):
         for imgs in userDict.get(name):
             txtMsg += str(imgs)[str(imgs).find("/") + 1:str(imgs).find(".")] + "\n"
     else:
-        txtMsg += "{}, you don't have any images in your Space Base!\nUse ~roll to pick some out!".format(
+        txtMsg += "{}, you don't have any images in your Space Base!\nUse sb!roll to pick some out!".format(
             message.author.mention)
     await message.channel.send(txtMsg)
+
+
+async def peekBase(message):
+    """
+    View another user's Space Base in text form
+    :param message: The user making the request, with the other user's name
+    """
+    requester = message.author
+    try:
+        requested = await client.fetch_user(message.content[message.content.find(" ")+4:len(message.content)-1])
+        txtMsg = ""
+        if requested.name in userDict.keys():
+            txtMsg += "Hello {}, here are all of the images in {}'s Space Base!\n".format(requester.mention, requested.name)
+            for imgs in userDict.get(requested.name):
+                txtMsg += str(imgs)[str(imgs).find("/") + 1:str(imgs).find(".")] + "\n"
+        else:
+            txtMsg += "{}, {} doesn't have any images in their Space Base!\nTell them to use sb!roll to pick some out!"\
+                .format(requester.mention, requested.name)
+        await message.channel.send(txtMsg)
+    except Exception:
+        await message.channel.send("{}, there is no one in this server with that name! Please make sure you do\n"
+                                   "sb!peekbase @[username]".format(requester.mention))
 
 
 async def rem(message):
