@@ -53,7 +53,6 @@ async def on_message(message):
         await showme(message)
     elif message.content.lower() == "bad bot":
         await message.channel.send("Bad {}".format(message.author.mention))
-        print(message.content.lower()[:11])
     elif message.content.lower()[:11] == "sb!peekbase":
         await peekBase(message)
 
@@ -133,8 +132,7 @@ async def rem(message):
     if name in userDict.keys():
         for imgs in userDict.get(name):
             imgsName = str(imgs)[str(imgs).find("/") + 1:str(imgs).find(".")]
-            if imgsName.lower() == message.content.lower()[5:]:
-                print(imgStore)
+            if imgsName.lower() == message.content.lower()[7:]:
                 userDict[name].remove(imgs)
                 await message.channel.send("{} has been removed from your space base and inserted back into the store!"
                                            .format(imgsName))
