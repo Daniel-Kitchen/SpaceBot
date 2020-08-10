@@ -1,26 +1,34 @@
 import discord, os, random, time
 from dotenv import load_dotenv
-from datetime import datetime
 
 load_dotenv()
 
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')  # Bot's secret token
 
-allImgs = os.listdir("SourceImages")
-imgStore = allImgs.copy()
-rollQueue = []
-userDict = {}
+allImgs = os.listdir("SourceImages")  # List of source images
+imgStore = allImgs.copy()  # Copy of list of source images, is a bank for the rolling game
+rollQueue = []  # Stored rolls that have not been reacted to yet
+userDict = {}  # List of all users and their Space Base's content
 
 client = discord.Client()
 
 
 @client.event
 async def on_ready():
+    """
+    Built-in Discord.py client event.
+    Displays to console on successful instantiation of the bot
+    """
     print(f'{client.user} has connected to Discord!')
 
 
 @client.event
 async def on_message(message):
+    """
+    Built-in Discord.py client event.
+    Handles all commands and user input.
+    :param message: The user that sent a request to the bot
+    """
     if message.content.lower() == 'sb!help':
         await message.channel.send("Check your dms for a list of all commands available! Have fun!")
         await message.author.send(msgHelp())
@@ -44,6 +52,10 @@ async def on_message(message):
 
 
 def botCredits():
+    """
+    All about me : )
+    :return: returns a string to be dmed to the user
+    """
     msg = "This bot is developed by Daniel \"Kitch\" Kitchen for the 2020 BAS Hackathon\n" \
           "Contact info: \n" \
           "Discord: Kitch#2846 \n" \
@@ -53,6 +65,11 @@ def botCredits():
 
 
 async def sendTxt(message):
+    """
+    Sends the user a list of all of their Space Base's content in text form, so that they can see more easily what they
+    have.
+    :param message: The user making the request
+    """
     name = message.author.name
     txtMsg = ""
     if name in userDict.keys():
@@ -66,6 +83,10 @@ async def sendTxt(message):
 
 
 async def rem(message):
+    """
+    Removes an image from the user's Space Base
+    :param message: The user making the request
+    """
     name = message.author.name
     if name in userDict.keys():
         for imgs in userDict.get(name):
@@ -80,6 +101,13 @@ async def rem(message):
 
 @client.event
 async def on_reaction_add(reaction, user):
+    """
+    Built-in Discord.py event
+    When a reaction is added, find the image it is responding to, make sure it is a user and that the image is not too
+    old, and then try to add it to their Space Base
+    :param reaction: The message being reacted to
+    :param user: The user reacting to it
+    """
     for obj in rollQueue:
         if obj[0].id == reaction.message.id and user.name != "Spaaaaaaaaaaaaaace" and not \
                 time.time() - obj[2] > 60:
@@ -93,6 +121,12 @@ async def on_reaction_add(reaction, user):
 
 
 async def addToSpaceBase(obj, user, reaction):
+    """
+    Takes an image and adds it to their space base if they satisfy the conditions of the game
+    :param obj: The image in question
+    :param user: The user in question
+    :param reaction: The channel the reaction was made in
+    """
     ogName = obj[1].name
     if ogName == user.name:
         if ogName in userDict.keys():
@@ -119,6 +153,10 @@ async def addToSpaceBase(obj, user, reaction):
 
 
 def msgHelp():
+    """
+    Help message with a list of all commands
+    :return: A text string to be dmed to the user
+    """
     helpText = "***Developed for the BAS Hackathon 2020, sb!Credits for more info!***\n" \
                "**sb!help** to see this message again\n" \
                "**sb!random** to see a random image of space\n" \
@@ -128,17 +166,26 @@ def msgHelp():
                "**sb!SpaceBase** to see all of the images in your space base that you have claimed sent to your dms!\n" \
                "**sb!BaseTxt** to see the names of all of the images you have in your Space Base\n" \
                "**sb!Rem [\"imagename\"]** to remove an image from your Space Base and put it back in the pool\n" \
-               "**sb!Credits** for information about the developer and this project"
+               "**sb!Credits** for information about the developer and this project\n" \
+               "**good bot** no u"
     return helpText
 
 
 def randomImg():
+    """
+    Generates a random image for the user from the SourceImages folder
+    :return: random image
+    """
     rand = random.randint(0, len(allImgs) - 1)
     image = allImgs[rand]
     return image
 
 
 async def roll(message):
+    """
+    Rolls a random image from the currently available bank
+    :param message: Allows the bot to recall where the message was sent, and who the message was sent by
+    """
     msgId = await message.channel.send("Rolling images...")
     msgId = msgId.id
     result = await message.channel.fetch_message(msgId)
@@ -164,6 +211,10 @@ async def roll(message):
 
 
 async def sendImgs(message):
+    """
+    Sends all of a user's Space Base to them in dms
+    :param message: The user that made the request
+    """
     name = message.author.name
     if name in userDict.keys():
         for imgs in userDict.get(name):
