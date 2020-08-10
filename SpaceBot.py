@@ -21,23 +21,23 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.content.lower() == '~help':
+    if message.content.lower() == 'sb!help':
         await message.channel.send("Check your dms for a list of all commands available! Have fun!")
         await message.author.send(msgHelp())
-    elif message.content.lower() == "~random":
+    elif message.content.lower() == "sb!random":
         imgName = randomImg()
         image = "SourceImages/" + imgName
         await message.channel.send(content="Your random space image is: " + os.path.splitext(imgName)[0],
                                    file=discord.File(image))
-    elif message.content.lower() == "~roll":
+    elif message.content.lower() == "sb!roll":
         await roll(message)
-    elif message.content.lower() == "~spacebase":
+    elif message.content.lower() == "sb!spacebase":
         await sendImgs(message)
-    elif message.content.lower() == "~basetxt":
+    elif message.content.lower() == "sb!basetxt":
         await sendTxt(message)
-    elif message.content.lower()[:4] == "~rem":
+    elif message.content.lower()[:4] == "sb!rem":
         await rem(message)
-    elif message.content.lower() == "~credits":
+    elif message.content.lower() == "sb!credits":
         await message.author.send(botCredits())
     elif message.content.lower() == "good bot":
         await message.channel.send("Good {}".format(message.author.mention))
@@ -119,16 +119,16 @@ async def addToSpaceBase(obj, user, reaction):
 
 
 def msgHelp():
-    helpText = "***This bot is a work in progress, please be gentle***\n" \
-               "**~help** to see this message again\n" \
-               "**~random** to see a random image of space\n" \
-               "**~roll** to generate a random image. React to the image to claim it\n" \
+    helpText = "***Developed for the BAS Hackathon 2020, sb!Credits for more info!***\n" \
+               "**sb!help** to see this message again\n" \
+               "**sb!random** to see a random image of space\n" \
+               "**sb!roll** to generate a random image. React to the image to claim it\n" \
                "* Note: You have 10 seconds to claim this image for yourself before it opens to the whole server!\n" \
                "* Note: The opportunity for any user to claim an image expires after 60 seconds\n" \
-               "**~SpaceBase** to see all of the images in your space base sent to your dms!\n" \
-               "**~BaseTxt** to see the names of all of the images you have in your Space Base\n" \
-               "**~Rem [\"imagename\"]** to remove an image from your Space Base and put it back in the pool\n" \
-               "**~Credits** for information about the developer and this project"
+               "**sb!SpaceBase** to see all of the images in your space base that you have claimed sent to your dms!\n" \
+               "**sb!BaseTxt** to see the names of all of the images you have in your Space Base\n" \
+               "**sb!Rem [\"imagename\"]** to remove an image from your Space Base and put it back in the pool\n" \
+               "**sb!Credits** for information about the developer and this project"
     return helpText
 
 
